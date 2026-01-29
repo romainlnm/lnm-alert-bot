@@ -2,15 +2,13 @@ import { createBot } from './bot/index.js'
 import { priceFeed } from './services/price-feed.js'
 import { AlertEngine } from './services/alerts.js'
 
-const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
-
-if (!BOT_TOKEN) {
-  console.error('Error: TELEGRAM_BOT_TOKEN required')
-  process.exit(1)
-  throw new Error('unreachable') // helps TypeScript narrow the type
-}
-
 async function main() {
+  const token = process.env.TELEGRAM_BOT_TOKEN
+  if (!token) {
+    console.error('Error: TELEGRAM_BOT_TOKEN required')
+    process.exit(1)
+  }
+
   console.log('Starting LN Markets Alert Bot...')
 
   // Start price feed
@@ -24,7 +22,7 @@ async function main() {
   console.log(`Price feed ready: $${priceFeed.currentPrice.toLocaleString()}`)
 
   // Create and start bot
-  const bot = createBot(BOT_TOKEN)
+  const bot = createBot(token)
   const alertEngine = new AlertEngine(bot)
   alertEngine.start()
 
