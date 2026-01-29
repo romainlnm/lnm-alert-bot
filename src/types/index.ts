@@ -1,30 +1,22 @@
 export type AlertType =
+  // Simple price alerts
   | 'price_above'
   | 'price_below'
-  | 'funding_above'
-  | 'funding_below'
+  // Smart alerts
+  | 'percent_change'    // e.g., -5% in 1h
+  | 'volatility'        // e.g., 3% move in 15min
+  // Private alerts
   | 'margin_below'
   | 'liquidation_distance'
-  | 'position_pnl'
 
-export interface PriceAlert {
-  type: 'price_above' | 'price_below'
-  targetPrice: number
+export interface PriceSnapshot {
+  price: number
+  timestamp: number
 }
 
-export interface FundingAlert {
-  type: 'funding_above' | 'funding_below'
-  targetRate: number
-}
-
-export interface MarginAlert {
-  type: 'margin_below'
-  thresholdPercent: number
-}
-
-export interface LiquidationAlert {
-  type: 'liquidation_distance'
-  distancePercent: number
+export interface SmartAlertConfig {
+  percentChange: number   // e.g., -5 for -5%
+  timeWindowMinutes: number  // e.g., 60 for 1 hour
 }
 
 export interface UserCredentials {
@@ -51,9 +43,4 @@ export interface Ticker {
   ask: number
   high24h: number
   low24h: number
-}
-
-export interface FundingInfo {
-  rate: number
-  nextFundingTime: Date
 }

@@ -1,37 +1,53 @@
 # LN Markets Alert Bot
 
-Telegram bot for LN Markets price and position alerts.
+Telegram bot for LN Markets price alerts with smart notifications.
 
 ## Features
 
-### Public (no account required)
-- `/price <amount>` - Alert when BTC hits a price
-- `/funding <rate>` - Alert on funding rate changes
-- `/ticker` - Current price and funding info
-- `/alerts` - View your active alerts
-- `/cancel <number>` - Cancel an alert
+### Smart Alerts
+- **Percent change alerts** - "Alert me if BTC drops 5% in 1 hour"
+- Configurable time windows: 15min, 1h, 4h, 12h, 24h
+- Works for both pumps (+5%) and dumps (-5%)
 
-### Private (requires API key)
-- `/connect` - Link your LN Markets account
-- `/status` - View your positions and balance
-- `/margin <percent>` - Alert when margin drops below threshold
-- `/liquidation <percent>` - Alert when liquidation is near
-- `/disconnect` - Remove your API credentials
+### Simple Alerts
+- Price above $X
+- Price below $X
+
+### Easy Interface
+- No commands to remember
+- Button-based navigation
+- One tap to create alerts
+
+## Screenshots
+
+```
+┌─────────────────────────────┐
+│ ⚡ LN Markets Alerts        │
+│                             │
+│ 💰 BTC: $97,432             │
+│ 📊 1h: +0.5%  24h: -2.1%    │
+│                             │
+│ ┌───────────┬────────────┐  │
+│ │ 🔔 New    │ 📋 My      │  │
+│ │   Alert   │   Alerts   │  │
+│ └───────────┴────────────┘  │
+│ ┌────────────────────────┐  │
+│ │ 🔐 Connect Account     │  │
+│ └────────────────────────┘  │
+└─────────────────────────────┘
+```
 
 ## Setup
 
-1. **Create a Telegram bot**
-   - Talk to [@BotFather](https://t.me/BotFather)
-   - Create a new bot with `/newbot`
-   - Copy the token
+1. Create a bot with [@BotFather](https://t.me/BotFather)
 
-2. **Configure environment**
+2. Configure:
    ```bash
    cp .env.example .env
-   # Edit .env with your bot token
+   # Add your TELEGRAM_BOT_TOKEN
    ```
 
-3. **Install and run**
+3. Run:
    ```bash
    pnpm install
    pnpm dev
@@ -39,43 +55,26 @@ Telegram bot for LN Markets price and position alerts.
 
 ## Deployment
 
-### Using Docker
+### Docker
 
-```dockerfile
-FROM node:22-alpine
-WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
-RUN corepack enable && pnpm install --frozen-lockfile
-COPY . .
-RUN pnpm build
-CMD ["node", "dist/index.js"]
+```bash
+docker build -t lnm-alert-bot .
+docker run -e TELEGRAM_BOT_TOKEN=xxx lnm-alert-bot
 ```
 
-### Using systemd
+### Fly.io
 
-```ini
-[Unit]
-Description=LN Markets Alert Bot
-After=network.target
-
-[Service]
-Type=simple
-User=bot
-WorkingDirectory=/opt/lnm-alert-bot
-ExecStart=/usr/bin/node dist/index.js
-Restart=always
-EnvironmentFile=/opt/lnm-alert-bot/.env
-
-[Install]
-WantedBy=multi-user.target
+```bash
+fly launch
+fly secrets set TELEGRAM_BOT_TOKEN=xxx
+fly deploy
 ```
 
-## Security Notes
+## Coming Soon
 
-- API credentials are stored in SQLite (consider encryption for production)
-- Users should create **read-only** API keys
-- The bot deletes messages containing credentials when possible
-- Never share your bot token
+- 🔐 Account connection for margin/liquidation alerts
+- 📊 Position tracking
+- 💰 P&L notifications
 
 ## License
 
