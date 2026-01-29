@@ -1,3 +1,4 @@
+import { initDb } from './db/index.js'
 import { createBot } from './bot/index.js'
 import { priceFeed } from './services/price-feed.js'
 import { AlertEngine } from './services/alerts.js'
@@ -11,12 +12,16 @@ async function main() {
 
   console.log('Starting LN Markets Alert Bot...')
 
+  // Initialize database
+  await initDb()
+  console.log('Database ready')
+
   // Start price feed
   priceFeed.start()
 
   // Wait for first price
   await new Promise<void>((resolve) => {
-    const check = () => priceFeed.currentPrice ? resolve() : setTimeout(check, 100)
+    const check = () => (priceFeed.currentPrice ? resolve() : setTimeout(check, 100))
     check()
   })
   console.log(`Price feed ready: $${priceFeed.currentPrice.toLocaleString()}`)

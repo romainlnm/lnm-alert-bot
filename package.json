@@ -13,14 +13,13 @@
   },
   "dependencies": {
     "@ln-markets/api": "^2.0.0",
-    "better-sqlite3": "^11.7.0",
-    "drizzle-orm": "^0.38.0",
     "grammy": "^1.31.0",
+    "sql.js": "^1.11.0",
     "zod": "^3.24.0"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.12",
     "@types/node": "^22.10.0",
+    "@types/sql.js": "^1.4.9",
     "drizzle-kit": "^0.30.0",
     "tsx": "^4.19.0",
     "typescript": "^5.7.0"

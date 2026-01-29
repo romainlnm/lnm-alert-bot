@@ -1,6 +1,5 @@
 import { EventEmitter } from 'events'
-import { db, schema } from '../db/index.js'
-import { lt } from 'drizzle-orm'
+import { addPriceHistory, getPriceAtTime } from '../db/index.js'
 
 const API_BASE = 'https://api.lnmarkets.com'
 
@@ -11,49 +10,34 @@ interface PriceFeedEvents {
 
 class PriceFeed extends EventEmitter<PriceFeedEvents> {
   private intervalId?: ReturnType<typeof setInterval>
-  private historyCleanupId?: ReturnType<typeof setInterval>
   private _currentPrice: number = 0
-  private priceHistory: Array<{ price: number; timestamp: number }> = []
+  private priceCache: Array<{ price: number; timestamp: number }> = []
 
   get currentPrice(): number {
     return this._currentPrice
   }
 
-  // Get price from N minutes ago
-  getPriceAtTime(minutesAgo: number): number | null {
+  getPercentChange(minutesAgo: number): number | null {
+    // Try in-memory cache first
     const targetTime = Date.now() - minutesAgo * 60 * 1000
-    // Find closest price to target time
-    const closest = this.priceHistory
+    const cached = this.priceCache
       .filter((p) => p.timestamp <= targetTime)
       .sort((a, b) => b.timestamp - a.timestamp)[0]
-    return closest?.price ?? null
-  }
 
-  // Calculate percent change over time window
-  getPercentChange(minutesAgo: number): number | null {
-    const oldPrice = this.getPriceAtTime(minutesAgo)
+    const oldPrice = cached?.price ?? getPriceAtTime(minutesAgo * 60)
     if (!oldPrice || !this._currentPrice) return null
     return ((this._currentPrice - oldPrice) / oldPrice) * 100
   }
 
   start(): void {
     if (this.intervalId) return
-
     this.poll()
     this.intervalId = setInterval(() => this.poll(), 5000)
-
-    // Load recent price history from DB
-    this.loadHistory()
-
-    // Clean old history every hour
-    this.historyCleanupId = setInterval(() => this.cleanupHistory(), 60 * 60 * 1000)
-
     console.log('Price feed started')
   }
 
   stop(): void {
     if (this.intervalId) clearInterval(this.intervalId)
-    if (this.historyCleanupId) clearInterval(this.historyCleanupId)
   }
 
   private async poll(): Promise<void> {
@@ -63,42 +47,21 @@ class PriceFeed extends EventEmitter<PriceFeedEvents> {
       this._currentPrice = data.lastPrice
 
       const now = Date.now()
-      this.priceHistory.push({ price: data.lastPrice, timestamp: now })
+      this.priceCache.push({ price: data.lastPrice, timestamp: now })
 
-      // Keep only last 24h in memory
+      // Keep 24h in memory
       const cutoff = now - 24 * 60 * 60 * 1000
-      this.priceHistory = this.priceHistory.filter((p) => p.timestamp > cutoff)
+      this.priceCache = this.priceCache.filter((p) => p.timestamp > cutoff)
 
-      // Store in DB (every minute is enough)
-      if (this.priceHistory.length % 12 === 0) {
-        await db.insert(schema.priceHistory).values({
-          price: data.lastPrice,
-          timestamp: new Date(now),
-        })
+      // Store to DB every minute
+      if (this.priceCache.length % 12 === 0) {
+        addPriceHistory(data.lastPrice)
       }
 
       this.emit('price', data.lastPrice)
     } catch (error) {
       this.emit('error', error instanceof Error ? error : new Error(String(error)))
     }
-  }
-
-  private async loadHistory(): Promise<void> {
-    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000)
-    const rows = await db
-      .select()
-      .from(schema.priceHistory)
-      .where(lt(schema.priceHistory.timestamp, cutoff))
-
-    this.priceHistory = rows.map((r) => ({
-      price: r.price,
-      timestamp: r.timestamp.getTime(),
-    }))
-  }
-
-  private async cleanupHistory(): Promise<void> {
-    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000)
-    await db.delete(schema.priceHistory).where(lt(schema.priceHistory.timestamp, cutoff))
   }
 }
 
