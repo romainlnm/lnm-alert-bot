@@ -7,6 +7,7 @@ const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
 if (!BOT_TOKEN) {
   console.error('Error: TELEGRAM_BOT_TOKEN required')
   process.exit(1)
+  throw new Error('unreachable') // helps TypeScript narrow the type
 }
 
 async function main() {
