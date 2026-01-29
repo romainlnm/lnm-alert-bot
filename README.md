@@ -1,80 +1,22 @@
 # LN Markets Alert Bot
 
-Telegram bot for LN Markets price alerts with smart notifications.
+Telegram bot for BTC price alerts on LN Markets.
 
 ## Features
 
-### Smart Alerts
-- **Percent change alerts** - "Alert me if BTC drops 5% in 1 hour"
-- Configurable time windows: 15min, 1h, 4h, 12h, 24h
-- Works for both pumps (+5%) and dumps (-5%)
-
-### Simple Alerts
-- Price above $X
-- Price below $X
-
-### Easy Interface
-- No commands to remember
-- Button-based navigation
-- One tap to create alerts
-
-## Screenshots
-
-```
-┌─────────────────────────────┐
-│ ⚡ LN Markets Alerts        │
-│                             │
-│ 💰 BTC: $97,432             │
-│ 📊 1h: +0.5%  24h: -2.1%    │
-│                             │
-│ ┌───────────┬────────────┐  │
-│ │ 🔔 New    │ 📋 My      │  │
-│ │   Alert   │   Alerts   │  │
-│ └───────────┴────────────┘  │
-│ ┌────────────────────────┐  │
-│ │ 🔐 Connect Account     │  │
-│ └────────────────────────┘  │
-└─────────────────────────────┘
-```
+- **Smart alerts** - "Alert me if BTC drops 5% in 1 hour"
+- **Price alerts** - "Alert me when BTC hits $100k"
+- **Button-based UI** - No commands to remember
 
 ## Setup
 
 1. Create a bot with [@BotFather](https://t.me/BotFather)
-
-2. Configure:
+2. Deploy to Fly.io:
    ```bash
-   cp .env.example .env
-   # Add your TELEGRAM_BOT_TOKEN
+   fly launch
+   fly secrets set TELEGRAM_BOT_TOKEN=your_token
+   fly deploy
    ```
-
-3. Run:
-   ```bash
-   pnpm install
-   pnpm dev
-   ```
-
-## Deployment
-
-### Docker
-
-```bash
-docker build -t lnm-alert-bot .
-docker run -e TELEGRAM_BOT_TOKEN=xxx lnm-alert-bot
-```
-
-### Fly.io
-
-```bash
-fly launch
-fly secrets set TELEGRAM_BOT_TOKEN=xxx
-fly deploy
-```
-
-## Coming Soon
-
-- 🔐 Account connection for margin/liquidation alerts
-- 📊 Position tracking
-- 💰 P&L notifications
 
 ## License
 
