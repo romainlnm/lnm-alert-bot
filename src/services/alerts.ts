@@ -77,7 +77,10 @@ export class AlertEngine {
 
   private async sendAlert(alert: Alert, message: string): Promise<void> {
     try {
-      await this.bot.api.sendMessage(alert.telegram_id, message, { parse_mode: 'HTML' })
+      await this.bot.api.sendMessage(alert.telegram_id, message, {
+        parse_mode: 'HTML',
+        disable_notification: false, // Explicitly enable notification sound
+      })
       markAlertTriggered(alert.id, true)
       console.log(`Alert ${alert.id} triggered for user ${alert.telegram_id}`)
     } catch (error) {
