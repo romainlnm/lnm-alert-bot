@@ -1,0 +1,17 @@
+app = 'lnm-alert-bot'
+primary_region = 'cdg'
+
+[build]
+
+[env]
+  NODE_ENV = 'production'
+  DATABASE_PATH = '/data/alerts.db'
+
+[mounts]
+  source = 'lnm_alerts_data'
+  destination = '/data'
+
+[[vm]]
+  memory = '256mb'
+  cpu_kind = 'shared'
+  cpus = 1
